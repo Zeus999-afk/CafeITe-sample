@@ -1,4 +1,4 @@
-# cafeite_samples
+# cafeite
 
 A new Flutter project.
 
