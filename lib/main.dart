@@ -1,6 +1,8 @@
 /*
-  NRP: 992024007
-  Nama: Zilfany
+  992024008 - Nurmei Sarrah
+  992024007 - Zilfany
+  992024006 - Masyitah Nanda Yassril
+  162022030 - Gilang Ramadhan
   Deskripsi Kode: 
   Tanggal kode dibuat:
 */
