@@ -7,7 +7,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:cafeite/home.dart';
+import 'package:cafeite/makanan/home.dart';
 
 void main() {
   runApp(const MyApp());
