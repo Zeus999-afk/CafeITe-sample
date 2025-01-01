@@ -1,102 +1,148 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:cafeite/config.dart';
-import 'package:cafeite/model.dart';
-import 'package:cafeite/restapi.dart';
-import 'package:flutter/widgets.dart';
+import 'package:cafeite/cart_page.dart';
 
-class MakananList extends StatefulWidget {
-  const MakananList({Key? key}) : super(key: key);
-
+class SplashScreen extends StatefulWidget {
   @override
-  MakananListState createState() => MakananListState();
+  _SplashScreenState createState() => _SplashScreenState();
 }
 
-class MakananListState extends State<MakananList> {
-  final searchKeyword = TextEditingController();
-  bool searchStatus = false;
-
-  DataService ds = DataService();
-
-  List data = [];
-  List<MakananModel> makanan = [];
-
-  List<MakananModel> search_data = [];
-  List<MakananModel> search_data_pre = [];
-
-  selectAllMakananr() async {
-    data = jsonDecode(await ds.selectAll(token, project, 'makanan', appid));
-
-    makanan = data.map((e) => MakananModel.fromJson(e)).toList();
-
-    setState(() {
-      makanan = makanan;
-    });
-  }
-
-  void filterMakanan(String enteredKeyword) {
-    if (enteredKeyword.isEmpty) {
-      search_data = data.map((e) => MakananModel.fromJson(e)).toList();
-    } else {
-      search_data_pre = data.map((e) => MakananModel.fromJson(e)).toList();
-      search_data = search_data_pre
-          .where((user) => user.deskripsi
-              .toLowerCase()
-              .contains(enteredKeyword.toLowerCase()))
-          .toList();
-    }
-
-    setState(() {
-      makanan = search_data;
-    });
-  }
-
-  Future reloadDataMakanan(dynamic valye) async {
-    setState(() {
-      selectAllMakananr();
-    });
-  }
-
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    selectAllMakananr();
+    _gotoNavigateToHome();
+  }
+
+  _gotoNavigateToHome() async {
+    await Future.delayed(Duration(seconds: 4));
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Image.asset('assets_snack/splashscreen.jpg',
+            width: 150, height: 150),
+      ),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+
+  List<CartItem> cartItems = [];
+
+  void addToCart(String name, String price, String image) {
+    setState(() {
+      cartItems.add(CartItem(name: name, price: price, image: image));
+    });
+    print("$name berhasil ditambah ke keranjang");
+  }
+
+  final List<Map<String, String>> menuItems = [
+    {
+      'name': 'Beng Beng',
+      'price': 'Rp 2.000',
+      'pict': 'assets_snack/bengbeng.jpg',
+    },
+    {
+      'name': 'Ayam Goreng',
+      'price': 'Rp 25.000',
+      'pict': 'assets_snack/ayam_goreng.jpg',
+    },
+    {
+      'name': 'Mie Goreng',
+      'price': 'Rp 15.000',
+      'pict': 'assets_snack/mie_goreng.jpg',
+    },
+    {
+      'name': 'Es Teh',
+      'price': 'Rp 5.000',
+      'pict': 'assets_snack/es_teh.jpg',
+    },
+  ];
+
+  Widget searchField() {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: TextField(
+        onChanged: (value) {
+          print("Filter: $value");
+          // Tambahkan fungsi filter jika diperlukan
+        },
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Color(0xFFF7EED3),
+          hintText: 'Mau Makan Apa niiiih?',
+          prefixIcon: const Icon(Icons.search),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(30.0),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 0) {
+      print("Home tapped");
+    } else if (index == 1) {
+      print("Search tapped");
+    } else if (index == 2) {
+      print("Profile tapped");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("CafeITe's Menu"),
-        backgroundColor: Colors.brown[200],
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart),
-            onPressed: () {
-              // Aksi ketika ikon keranjang ditekan
-            },
-          ),
-        ],
+        centerTitle: true,
+        backgroundColor: const Color(0xFFF7EED3),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            Text(
+              "CafeITe's Menu",
+              style: TextStyle(fontSize: 20),
+            ),
+            IconButton(
+              icon: Icon(Icons.shopping_cart),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CartPage(
+                              cartItems: cartItems,
+                            )));
+              },
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: TextField(
-              onChanged: filterMakanan,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.brown[50],
-                hintText: 'Mau Makan Apa niiiih?',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30.0),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
+          searchField(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Row(
@@ -107,19 +153,33 @@ class MakananListState extends State<MakananList> {
                     // Filter Makanan Berat
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.brown,
+                    backgroundColor: const Color(0xFF8B0000),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  child: const Text("Makanan Berat"),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.fastfood,
+                        color: Colors.white,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        "Makanan Berat",
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 255, 255, 255),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () {
                     // Filter Snack
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey,
+                    backgroundColor: const Color.fromARGB(255, 255, 255, 255),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -129,68 +189,72 @@ class MakananListState extends State<MakananList> {
               ],
             ),
           ),
+          SizedBox(height: 8),
           Expanded(
             child: GridView.builder(
-              padding: const EdgeInsets.all(10.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.9,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
+                childAspectRatio: 0.8,
+                crossAxisSpacing: 13,
+                mainAxisSpacing: 8.0,
               ),
-              itemCount: makanan.length,
+              itemCount: menuItems.length,
               itemBuilder: (context, index) {
-                final item = makanan[index];
-
+                final item = menuItems[index];
                 return Card(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0),
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
-                  elevation: 5,
+                  elevation: 4.0,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(15.0),
-                          ),
-                          child: Image.asset(
-                            item.imageurl,
-                            fit: BoxFit.cover,
-                          ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(8.0),
+                        ),
+                        child: Image.asset(
+                          item["pict"]!,
+                          height: 150,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.nama_makanan,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              item.harga,
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                          ],
+                        child: Text(
+                          item["name"]!,
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: IconButton(
-                          icon: const Icon(Icons.add_circle),
-                          color: Colors.brown,
-                          onPressed: () {
-                            // Aksi ketika tombol tambah ditekan
-                          },
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              item["price"]!,
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                showAddToCartDialog(context, () {
+                                  addToCart(item["name"]!, item["price"]!,
+                                      item["pict"]!);
+                                });
+                              },
+                              icon: Icon(
+                                Icons.add,
+                                color: Colors.brown,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -202,13 +266,14 @@ class MakananListState extends State<MakananList> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
+        backgroundColor: Color(0xFFF7EED3),
+        items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_long),
+            icon: Icon(Icons.shopping_basket),
             label: 'Pesanan Saya',
           ),
           BottomNavigationBarItem(
@@ -216,33 +281,16 @@ class MakananListState extends State<MakananList> {
             label: 'Profile',
           ),
         ],
-        selectedItemColor: Colors.brown,
-        unselectedItemColor: Colors.grey,
-        onTap: (index) {
-          // Aksi ketika item navigasi ditekan
-        },
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
       ),
     );
   }
+}
 
-  Widget search_field() {
-    return TextField(
-      controller: searchKeyword,
-      autofocus: true,
-      cursorColor: Colors.white,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 20.0,
-      ),
-      textInputAction: TextInputAction.search,
-      onChanged: (value) => filterMakanan(value),
-      decoration: const InputDecoration(
-        hintText: 'Enter to Search',
-        hintStyle: TextStyle(
-          color: Color.fromARGB(255, 255, 255, 255),
-          fontSize: 20,
-        ),
-      ),
-    );
-  }
+void main() {
+  runApp(MaterialApp(
+    home: SplashScreen(),
+  ));
 }
