@@ -11,6 +11,7 @@ import 'package:cafeite/screens/profile_page.dart';
 import 'package:cafeite/config.dart';
 import 'package:cafeite/utils/model.dart';
 import 'package:cafeite/utils/restapi.dart';
+import 'package:cafeite/screens/cart_page.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -30,6 +31,15 @@ class _HomePageState extends State<HomePage> {
 
   late User _currentUser;
   late List<Widget> _pages;
+
+  List<CartItem> cartItems = [];
+
+  void addToCart(String name, String price, String image) {
+    setState(() {
+      cartItems.add(CartItem(name: name, price: price, image: image));
+    });
+    print("$name berhasil ditambah ke keranjang");
+  }
 
   @override
   void initState() {
@@ -125,7 +135,12 @@ class _HomePageState extends State<HomePage> {
             IconButton(
               icon: Icon(Icons.shopping_cart),
               onPressed: () {
-                print('Keranjang di tekan');
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => CartPage(
+                              cartItems: cartItems,
+                            )));
               },
             ),
           ],
@@ -235,7 +250,10 @@ class _HomePageState extends State<HomePage> {
                             ),
                             IconButton(
                               onPressed: () {
-                                print("${item["name"]} ditambahkan");
+                                showAddToCartDialog(context, () {
+                                  addToCart(item["name"]!, item["price"]!,
+                                      item["pict"]!);
+                                });
                               },
                               icon: Icon(
                                 Icons.add,
